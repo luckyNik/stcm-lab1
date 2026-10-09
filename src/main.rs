@@ -408,7 +408,7 @@ mod tests {
     fn test_hex_to_big_int_single() {
         let s = "123A";
 
-        let mut limbs = [0u64; 32];
+        let mut limbs = [0u64; BIG_INT_LIMBS];
         limbs[0] = 0x123A;
         let expected = BigInt { limbs };
 
@@ -419,7 +419,7 @@ mod tests {
     fn test_hex_to_big_int_multiple() {
         let s = "1000000000000123A";
 
-        let mut limbs = [0u64; 32];
+        let mut limbs = [0u64; BIG_INT_LIMBS];
         limbs[0] = 0x123A;
         limbs[1] = 0x1;
         let expected = BigInt { limbs };
@@ -429,7 +429,7 @@ mod tests {
 
     #[test]
     fn test_big_int_to_hex_single() {
-        let mut limbs = [0u64; 32];
+        let mut limbs = [0u64; BIG_INT_LIMBS];
         limbs[0] = 0x123A;
         let number = BigInt { limbs };
 
@@ -438,7 +438,7 @@ mod tests {
 
     #[test]
     fn test_big_int_to_hex_multiple() {
-        let mut limbs = [0u64; 32];
+        let mut limbs = [0u64; BIG_INT_LIMBS];
         limbs[0] = 0x123A;
         limbs[1] = 0x1;
         let number = BigInt { limbs };
