@@ -1,3 +1,5 @@
+use rand::Rng;
+
 const BIG_INT_LIMBS: usize = 32;
 
 enum Comparison {
@@ -301,7 +303,102 @@ fn horner_exponentiation_big_int(a: &BigInt, b: &BigInt) -> BigInt {
     }
     result
 }
-fn main() {}
+
+struct BenchmarkInput {
+    a: BigInt,
+    b: BigInt,
+    exponent: BigInt,
+}
+
+fn main() {
+    let mut rng = rand::rng();
+    let mut inputs = Vec::with_capacity(10_000);
+    let zero = u64_to_big_int(0);
+
+    for _ in 0..10_000 {
+        let a = BigInt {
+            limbs: std::array::from_fn(|_| rng.random()),
+        };
+        let mut b = BigInt {
+            limbs: std::array::from_fn(|_| rng.random()),
+        };
+        if b == zero {
+            b.limbs[0] = 1;
+        }
+        let exponent = u64_to_big_int(rng.random_range(1..=1023));
+        inputs.push(BenchmarkInput { a, b, exponent });
+    }
+
+    for input in &inputs[..1_000] {
+        std::hint::black_box(add_big_int(&input.a, &input.b));
+    }
+    let started = std::time::Instant::now();
+    for input in &inputs {
+        std::hint::black_box(add_big_int(&input.a, &input.b));
+    }
+    let add_average = started.elapsed().as_nanos() as f64 / 10_000.0;
+    println!("Addition\n{add_average:.1} ns/op\n");
+
+    for input in &inputs[..1_000] {
+        std::hint::black_box(subtract_big_int(&input.a, &input.b));
+    }
+    let started = std::time::Instant::now();
+    for input in &inputs {
+        std::hint::black_box(subtract_big_int(&input.a, &input.b));
+    }
+    let subtract_average = started.elapsed().as_nanos() as f64 / 10_000.0;
+    println!("Subtraction\n{subtract_average:.1} ns/op\n");
+
+    for input in &inputs[..1_000] {
+        std::hint::black_box(compare_big_int(&input.a, &input.b));
+    }
+    let started = std::time::Instant::now();
+    for input in &inputs {
+        std::hint::black_box(compare_big_int(&input.a, &input.b));
+    }
+    let compare_average = started.elapsed().as_nanos() as f64 / 10_000.0;
+    println!("Comparison\n{compare_average:.1} ns/op\n");
+
+    for input in &inputs[..1_000] {
+        std::hint::black_box(mult_big_int(&input.a, &input.b));
+    }
+    let started = std::time::Instant::now();
+    for input in &inputs {
+        std::hint::black_box(mult_big_int(&input.a, &input.b));
+    }
+    let multiply_average = started.elapsed().as_nanos() as f64 / 10_000.0;
+    println!("Multiplication\n{multiply_average:.1} ns/op\n");
+
+    for input in &inputs[..1_000] {
+        std::hint::black_box(square_big_int(&input.a));
+    }
+    let started = std::time::Instant::now();
+    for input in &inputs {
+        std::hint::black_box(square_big_int(&input.a));
+    }
+    let square_average = started.elapsed().as_nanos() as f64 / 10_000.0;
+    println!("Square\n{square_average:.1} ns/op\n");
+
+    for input in &inputs[..1_000] {
+        std::hint::black_box(divide_mod_big_int(&input.a, &input.b));
+    }
+    let started = std::time::Instant::now();
+    for input in &inputs {
+        std::hint::black_box(divide_mod_big_int(&input.a, &input.b));
+    }
+    let divide_mod_average = started.elapsed().as_nanos() as f64 / 10_000.0;
+    println!("Division and modulo\n{divide_mod_average:.1} ns/op\n");
+
+    for input in &inputs[..1_000] {
+        std::hint::black_box(horner_exponentiation_big_int(&input.a, &input.exponent));
+    }
+    let started = std::time::Instant::now();
+    for input in &inputs {
+        std::hint::black_box(horner_exponentiation_big_int(&input.a, &input.exponent));
+    }
+    let exponentiation_average = started.elapsed().as_nanos() as f64 / 10_000.0;
+    println!("Horner exponentiation\n{exponentiation_average:.1} ns/op\n");
+}
 
 #[cfg(test)]
 mod tests {
